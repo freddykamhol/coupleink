@@ -1,13 +1,22 @@
-import 'dotenv/config'
+import { config as loadEnv } from 'dotenv'
 import { createReadStream, existsSync, statSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('.', import.meta.url))
+// Plesk kann Node mit einem anderen Arbeitsverzeichnis starten. Deshalb wird
+// die .env immer relativ zu dieser Startdatei geladen und nicht relativ zu cwd.
+loadEnv({path:join(root,'.env'),override:true,quiet:true})
+
+const cleanEnv = value => value?.trim().replace(/^(["'])(.*)\1$/,'$2')
 const port = Number(process.env.PORT || 3000)
-const adminUser = process.env.ADMIN_USER || process.env.VITE_ADMIN_USER
-const adminPassword = process.env.ADMIN_PASSWORD || process.env.VITE_ADMIN_PASSWORD
+const credentialSets = [
+  {source:'ADMIN_USER / ADMIN_PASSWORD',user:cleanEnv(process.env.ADMIN_USER),password:cleanEnv(process.env.ADMIN_PASSWORD)},
+  {source:'ADMIN_USERNAME / ADMIN_PASSWORD',user:cleanEnv(process.env.ADMIN_USERNAME),password:cleanEnv(process.env.ADMIN_PASSWORD)},
+  {source:'VITE_ADMIN_USER / VITE_ADMIN_PASSWORD',user:cleanEnv(process.env.VITE_ADMIN_USER),password:cleanEnv(process.env.VITE_ADMIN_PASSWORD)},
+]
+const adminCredentials = credentialSets.find(credentials=>credentials.user&&credentials.password)
 const mimeTypes = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.woff2':'font/woff2'}
 
 const json = (response,status,body) => {
@@ -25,12 +34,12 @@ const readJson = request => new Promise((resolve,reject) => {
 createServer(async (request,response) => {
   const url = new URL(request.url,'http://localhost')
   if(request.method==='POST' && url.pathname==='/api/admin/login'){
-    if(!adminUser||!adminPassword) return json(response,503,{error:'Admin-Zugang ist auf dem Server nicht konfiguriert.'})
+    if(!adminCredentials) return json(response,503,{error:'Admin-Zugang ist auf dem Server nicht konfiguriert.'})
     try{
       const {username,password}=await readJson(request)
-      return username===adminUser&&password===adminPassword
+      return cleanEnv(username)===adminCredentials.user&&cleanEnv(password)===adminCredentials.password
         ? json(response,200,{ok:true})
-        : json(response,401,{error:'Benutzername oder Passwort ist falsch.'})
+        : json(response,401,{error:`Benutzername oder Passwort ist falsch. Verwendete Konfiguration: ${adminCredentials.source}.`})
     }catch{ return json(response,400,{error:'Ungültige Anfrage.'}) }
   }
 
