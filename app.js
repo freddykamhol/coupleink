@@ -1,4 +1,4 @@
-import './style.css'
+import './src/style.css'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
