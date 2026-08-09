@@ -2,6 +2,8 @@ import './src/style.css'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
+const publicAsset = path => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
+
 const icon = (name) => {
   const icons = {
     arrow: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
@@ -17,12 +19,13 @@ const defaultArtists = [
   {id:'artist-3', name:'Lena'}, {id:'artist-4', name:'Max'}
 ]
 const defaultWorks = [
-  {id:'w1',artist:'fabi',src:'/images/IMG_6562.jpg'}, {id:'w2',artist:'katharine',src:'/images/IMG_6404.jpg'},
-  {id:'w3',artist:'fabi',src:'/images/IMG_6632.jpg'}, {id:'w4',artist:'katharine',src:'/images/IMG_6722.jpg'},
-  {id:'w5',artist:'fabi',src:'/images/IMG_6489.jpg'}, {id:'w6',artist:'katharine',src:'/images/IMG_7446.jpg'}
+  {id:'w1',artist:'fabi',src:publicAsset('images/IMG_6562.jpg')}, {id:'w2',artist:'katharine',src:publicAsset('images/IMG_6404.jpg')},
+  {id:'w3',artist:'fabi',src:publicAsset('images/IMG_6632.jpg')}, {id:'w4',artist:'katharine',src:publicAsset('images/IMG_6722.jpg')},
+  {id:'w5',artist:'fabi',src:publicAsset('images/IMG_6489.jpg')}, {id:'w6',artist:'katharine',src:publicAsset('images/IMG_7446.jpg')}
 ]
 let artists = JSON.parse(localStorage.getItem('coupleink-artists') || 'null') || defaultArtists
 let works = JSON.parse(localStorage.getItem('coupleink-works') || 'null') || defaultWorks
+works.forEach(work => { if(work.src?.startsWith('/images/')) work.src = publicAsset(work.src) })
 // Bezeichnungen aus der ersten Admin-Version verständlicher migrieren.
 artists.forEach(artist => {
   if(artist.id === 'artist-3' && ['Artist 03','Resident Artist I'].includes(artist.name)) artist.name = 'Lena'
@@ -32,7 +35,7 @@ localStorage.setItem('coupleink-artists', JSON.stringify(artists))
 
 document.querySelector('#app').innerHTML = `
   <header class="site-header">
-    <a class="brand" href="#top" aria-label="Couple Ink Startseite"><img src="/images/Logo-1.png" alt="Couple Ink" /></a>
+    <a class="brand" href="#top" aria-label="Couple Ink Startseite"><img src="${publicAsset('images/Logo-1.png')}" alt="Couple Ink" /></a>
     <nav class="desktop-nav" aria-label="Hauptnavigation"><a href="#works">Arbeiten</a><a href="#story">Über uns</a><a href="#contact">Kontakt</a></nav>
     <a class="header-cta" href="#booking">Termin anfragen ${icon('arrow')}</a>
     <button class="menu-button" type="button" aria-label="Menü öffnen" aria-expanded="false"><span></span><span></span></button>
@@ -65,17 +68,17 @@ document.querySelector('#app').innerHTML = `
     </section>
 
     <section id="story" class="story-section">
-      <div class="story-visual reveal"><img src="/images/Fabi_Katharine.jpeg" alt="Fabi und Katharine, Gründer von Couple Ink" loading="lazy"><div class="stamp">TWO MINDS<br><span>ONE PASSION</span></div></div>
+      <div class="story-visual reveal"><img src="${publicAsset('images/Fabi_Katharine.jpeg')}" alt="Fabi und Katharine, Gründer von Couple Ink" loading="lazy"><div class="stamp">TWO MINDS<br><span>ONE PASSION</span></div></div>
       <div class="story-content reveal"><p class="eyebrow"><span></span>Fabi & Katharine</p><h2>Aus Leidenschaft<br>wurde Familie.</h2><p>Alles begann 2016 auf einer Party in Karlsruhe. Fabi und Katharine merkten schnell, dass sie dieselbe Leidenschaft teilen. Kurz darauf begann Katharine in dem Studio zu piercen, in dem Fabi damals arbeitete – und Fabi begleitete sie auf ihrem Weg zur Tätowiererin.</p><p>Über Jahre arbeiteten beide Seite an Seite und wurden beste Freunde. Im Oktober 2020 eröffnete Katharine zunächst ihr eigenes Studio. Fabi arbeitete dort immer wieder mit ihr und beiden wurde klar, wie perfekt sie sich menschlich und in ihrer Arbeit ergänzen.</p><p>Aus Freundschaft wurde Liebe, aus zwei Wegen wurde ein gemeinsamer: Im Februar 2024 eröffneten sie Couple Ink in Wörth. Heute sind sie nicht nur Studioinhaber und Paar, sondern frischgebackene Eltern. Ihr Baby macht die kleine Couple-Ink-Familie vollkommen – und erinnert jeden Tag daran, worum es wirklich geht: Vertrauen, Zusammenhalt und etwas Bleibendes zu schaffen.</p><div class="signature">Fabi, Katharine & Family</div></div>
     </section>
 
     <section class="studio-family section-pad">
       <div class="family-lead reveal"><p class="eyebrow light"><span></span>More than a studio</p><h2>Vier Artists.<br><em>Eine Familie.</em></h2><p>Lena und Max waren schon immer vom Tätowieren fasziniert. Fabi und Katharine haben sie von Grund auf ausgebildet – und schnell wurde sichtbar, wie viel Talent in beiden steckt. Schon ihre ersten Kunden waren begeistert. Heute sind Lena und Max ein fester Bestandteil von Couple Ink. Wegzudenken? Unmöglich.</p></div>
       <div class="family-portraits reveal">
-        <figure class="portrait-max"><img src="/images/Max.jpeg" alt="Max, Tattoo Artist bei Couple Ink" loading="lazy"><figcaption><span>01</span><div><h3>Max</h3><p>Resident Artist · Bei Couple Ink ausgebildet</p></div></figcaption></figure>
-        <figure class="portrait-lena"><img src="/images/Lena.jpeg" alt="Lena, Tattoo Artist bei Couple Ink" loading="lazy"><figcaption><span>02</span><div><h3>Lena</h3><p>Resident Artist · Bei Couple Ink ausgebildet</p></div></figcaption></figure>
-        <figure class="portrait-team"><img src="/images/Team.jpeg" alt="Das gesamte Couple Ink Team" loading="lazy"><figcaption><span>03</span><div><h3>Das Team</h3><p>Vier Artists · Eine Familie</p></div></figcaption></figure>
-        <figure class="portrait-founders"><img src="/images/Fabi_Katharine.jpeg" alt="Fabi und Katharine" loading="lazy"><figcaption><span>04</span><div><h3>Fabi & Katharine</h3><p>Gründer · Mentoren · Familie</p></div></figcaption></figure>
+        <figure class="portrait-max"><img src="${publicAsset('images/Max.jpeg')}" alt="Max, Tattoo Artist bei Couple Ink" loading="lazy"><figcaption><span>01</span><div><h3>Max</h3><p>Resident Artist · Bei Couple Ink ausgebildet</p></div></figcaption></figure>
+        <figure class="portrait-lena"><img src="${publicAsset('images/Lena.jpeg')}" alt="Lena, Tattoo Artist bei Couple Ink" loading="lazy"><figcaption><span>02</span><div><h3>Lena</h3><p>Resident Artist · Bei Couple Ink ausgebildet</p></div></figcaption></figure>
+        <figure class="portrait-team"><img src="${publicAsset('images/Team.jpeg')}" alt="Das gesamte Couple Ink Team" loading="lazy"><figcaption><span>03</span><div><h3>Das Team</h3><p>Vier Artists · Eine Familie</p></div></figcaption></figure>
+        <figure class="portrait-founders"><img src="${publicAsset('images/Fabi_Katharine.jpeg')}" alt="Fabi und Katharine" loading="lazy"><figcaption><span>04</span><div><h3>Fabi & Katharine</h3><p>Gründer · Mentoren · Familie</p></div></figcaption></figure>
       </div>
       <div class="family-baby-note reveal"><span>∞</span><div><h3>Und das jüngste Familienmitglied</h3><p>Das Baby von Fabi und Katharine · Frisch angekommen · Schon mittendrin</p></div><i>♥</i></div>
       <div class="family-pride reveal"><span>Convention<br>Awards</span><strong>1.</strong><p>Ihre Arbeiten wurden bereits auf Conventions platziert – darunter mit dem 1. Platz. Ein Erfolg, der Talent, Mut und unzählige Stunden gemeinsamer Arbeit sichtbar macht.</p></div>
@@ -134,7 +137,7 @@ document.querySelector('#app').innerHTML = `
 
   <footer>
     <div class="footer-top"><p>Bereit für etwas,<br>das bleibt?</p><a href="#booking">Let's talk. ${icon('arrow')}</a></div>
-    <div class="footer-grid"><div><img src="/images/Logo-1.png" alt="Couple Ink"><p>Tattoo Studio<br>Wörth am Rhein</p></div><div><h3>Kontakt</h3><a href="tel:+4915562913149">+49 15562 913149</a><a href="mailto:kontakt@coupleink.de">kontakt@coupleink.de</a></div><div><h3>Navigation</h3><a href="#works">Arbeiten</a><a href="#story">Über uns</a><a href="#booking">Termin</a></div><div><h3>Social</h3><a href="https://www.instagram.com/coupleink_woerth/" target="_blank" rel="noopener noreferrer" aria-label="Couple Ink auf Instagram öffnen">@coupleink_woerth ${icon('instagram')}</a></div></div>
+    <div class="footer-grid"><div><img src="${publicAsset('images/Logo-1.png')}" alt="Couple Ink"><p>Tattoo Studio<br>Wörth am Rhein</p></div><div><h3>Kontakt</h3><a href="tel:+4915562913149">+49 15562 913149</a><a href="mailto:kontakt@coupleink.de">kontakt@coupleink.de</a></div><div><h3>Navigation</h3><a href="#works">Arbeiten</a><a href="#story">Über uns</a><a href="#booking">Termin</a></div><div><h3>Social</h3><a href="https://www.instagram.com/coupleink_woerth/" target="_blank" rel="noopener noreferrer" aria-label="Couple Ink auf Instagram öffnen">@coupleink_woerth ${icon('instagram')}</a></div></div>
     <div class="footer-bottom"><span>© ${new Date().getFullYear()} Couple Ink</span><div><a href="https://coupleink.de/impressum/">Impressum</a><a href="https://coupleink.de/datenschutzerklaerung/">Datenschutz</a><a href="https://coupleink.de/agb/">AGB</a><a href="?admin=1">Admin</a></div><a href="#top">Nach oben ↑</a></div>
   </footer>
 
@@ -245,7 +248,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 L.control.zoom({position:'bottomleft'}).addTo(studioMap)
 const studioIcon = L.divIcon({
   className:'studio-map-marker',
-  html:'<span><img src="/images/Logo-1.png" alt=""></span><i></i>',
+  html:`<span><img src="${publicAsset('images/Logo-1.png')}" alt=""></span><i></i>`,
   iconSize:[76,92], iconAnchor:[38,92]
 })
 L.marker(studioPosition,{icon:studioIcon,title:'Couple Ink Tattoo'}).addTo(studioMap).bindPopup('<strong>Couple Ink Tattoo</strong><br>Ottstraße 23A')
