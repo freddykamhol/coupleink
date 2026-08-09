@@ -143,15 +143,15 @@ document.querySelector('#app').innerHTML = `
 
   <dialog class="lightbox"><button aria-label="Schließen">${icon('close')}</button><img alt="Tattoo-Arbeit vergrößert"><p></p></dialog>
   <dialog class="admin-login">
-    <form method="dialog" class="admin-login-form">
-      <button class="admin-login-close" value="cancel" aria-label="Anmeldung schließen">${icon('close')}</button>
+    <form class="admin-login-form">
+      <button class="admin-login-close" type="button" aria-label="Anmeldung schließen">${icon('close')}</button>
       <small>COUPLE INK CMS</small>
       <h2>Admin-Anmeldung</h2>
       <p>Melde dich an, um die Galerie zu verwalten.</p>
       <label>Benutzername<input name="username" autocomplete="username" required></label>
       <label>Passwort<input name="password" type="password" autocomplete="current-password" required></label>
       <p class="admin-login-error" role="alert" aria-live="polite"></p>
-      <button class="admin-login-submit" value="login">Anmelden ${icon('arrow')}</button>
+      <button class="admin-login-submit" type="submit">Anmelden ${icon('arrow')}</button>
     </form>
   </dialog>
   <dialog class="admin-panel">
@@ -224,13 +224,14 @@ function renderAdmin(){
 }
 function optimizeImage(file){ return new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onerror=reject; reader.onload=()=>{ const img=new Image(); img.onerror=reject; img.onload=()=>{ const max=1600, scale=Math.min(1,max/Math.max(img.width,img.height)), canvas=document.createElement('canvas'); canvas.width=Math.round(img.width*scale); canvas.height=Math.round(img.height*scale); canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height); resolve(canvas.toDataURL('image/jpeg',.84)) }; img.src=reader.result }; reader.readAsDataURL(file) }) }
 admin.querySelector('.admin-close').addEventListener('click',()=>admin.close())
-adminLogin.addEventListener('close',()=>{
-  const form=adminLogin.querySelector('form')
-  if(adminLogin.returnValue!=='login') return
+adminLogin.querySelector('.admin-login-close').addEventListener('click',()=>adminLogin.close())
+adminLogin.querySelector('form').addEventListener('submit',event=>{
+  event.preventDefault()
+  const form=event.currentTarget
   const data=new FormData(form),error=form.querySelector('.admin-login-error')
-  if(!adminIsConfigured){ error.textContent='Admin-Zugang ist nicht konfiguriert.'; adminLogin.showModal(); return }
-  if(data.get('username')!==adminUser||data.get('password')!==adminPassword){ error.textContent='Benutzername oder Passwort ist falsch.'; form.elements.password.value=''; adminLogin.showModal(); form.elements.password.focus(); return }
-  sessionStorage.setItem(adminSessionKey,'true'); error.textContent=''; form.reset(); admin.showModal()
+  if(!adminIsConfigured){ error.textContent='Admin-Zugang ist nicht konfiguriert.'; return }
+  if(data.get('username')!==adminUser||data.get('password')!==adminPassword){ error.textContent='Benutzername oder Passwort ist falsch.'; form.elements.password.value=''; form.elements.password.focus(); return }
+  sessionStorage.setItem(adminSessionKey,'true'); error.textContent=''; form.reset(); adminLogin.close(); admin.showModal()
 })
 admin.querySelector('.admin-add-artist').addEventListener('submit',e=>{ e.preventDefault(); const name=new FormData(e.currentTarget).get('name').trim(); if(!name)return; const id=`artist-${Date.now()}`; artists.push({id,name}); activeArtist=id; e.currentTarget.reset(); persist(); adminStatus.textContent=`${name} wurde als Artist angelegt.` })
 admin.querySelector('.select-all-images').addEventListener('change',e=>{ selectedImages=e.target.checked?new Set(works.map(w=>w.id)):new Set(); renderAdmin() })
