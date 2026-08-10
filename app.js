@@ -58,7 +58,7 @@ const receiveUploads = request => new Promise((resolve,reject) => {
     file.on('limit',()=>{ limited=true })
     file.pipe(writer)
     pending.push(new Promise((done,fail)=>{
-      writer.on('finish',()=>{ if(limited){ unlinkSync(target); fail(new Error('Datei ist größer als 10 MB')) } else { uploaded.push({src:`/uploads/${artist}/${year}/${month}/${filename}`,filename:info.filename}); done() } })
+      writer.on('finish',()=>{ if(limited){ unlinkSync(target); fail(new Error('Datei ist größer als 10 MB')) } else { uploaded.push({src:`uploads/${artist}/${year}/${month}/${filename}`,filename:info.filename}); done() } })
       writer.on('error',fail)
     }))
   })
