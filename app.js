@@ -3,7 +3,7 @@ import Busboy from 'busboy'
 import { createReadStream, createWriteStream, existsSync, mkdirSync, statSync, unlinkSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { randomUUID } from 'node:crypto'
-import { extname, join, normalize } from 'node:path'
+import { extname, join, normalize, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('.', import.meta.url))
@@ -13,6 +13,7 @@ loadEnv({path:join(root,'.env'),override:true,quiet:true})
 
 const cleanEnv = value => value?.trim().replace(/^(["'])(.*)\1$/,'$2')
 const port = Number(process.env.PORT || 3000)
+const uploadRoot = resolve(cleanEnv(process.env.UPLOAD_DIR)||join(root,'uploads'))
 const credentialSets = [
   {source:'ADMIN_USER / ADMIN_PASSWORD',user:cleanEnv(process.env.ADMIN_USER),password:cleanEnv(process.env.ADMIN_PASSWORD)},
   {source:'ADMIN_USERNAME / ADMIN_PASSWORD',user:cleanEnv(process.env.ADMIN_USERNAME),password:cleanEnv(process.env.ADMIN_PASSWORD)},
@@ -50,7 +51,7 @@ const receiveUploads = request => new Promise((resolve,reject) => {
     const extensions={'image/jpeg':'.jpg','image/png':'.png','image/webp':'.webp'},extension=extensions[info.mimeType]
     if(name!=='images'||!extension){ file.resume(); return }
     if(!artist){ file.resume(); reject(new Error('Artist fehlt')); return }
-    const directory=join(root,'uploads',artist,year,month)
+    const directory=join(uploadRoot,artist,year,month)
     mkdirSync(directory,{recursive:true})
     const filename=`${randomUUID()}${extension}`,target=join(directory,filename),writer=createWriteStream(target,{flags:'wx'})
     let limited=false
@@ -88,9 +89,14 @@ createServer(async (request,response) => {
 
   if(request.method!=='GET'&&request.method!=='HEAD') return json(response,405,{error:'Methode nicht erlaubt.'})
   const relative = decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html'
-  const filePath = normalize(join(root,relative))
-  if(!filePath.startsWith(root)) return json(response,403,{error:'Zugriff verweigert.'})
-  const target = existsSync(filePath)&&statSync(filePath).isFile()?filePath:join(root,'index.html')
+  const servesUpload = relative.startsWith('uploads/')
+  const servingRoot = servesUpload?uploadRoot:root
+  const servingPath = servesUpload?relative.slice('uploads/'.length):relative
+  const filePath = normalize(join(servingRoot,servingPath))
+  if(filePath!==servingRoot&&!filePath.startsWith(`${servingRoot}${sep}`)) return json(response,403,{error:'Zugriff verweigert.'})
+  const exists = existsSync(filePath)&&statSync(filePath).isFile()
+  if(servesUpload&&!exists) return json(response,404,{error:'Bild nicht gefunden.'})
+  const target = exists?filePath:join(root,'index.html')
   response.writeHead(200,{'Content-Type':mimeTypes[extname(target).toLowerCase()]||'application/octet-stream'})
   if(request.method==='HEAD') return response.end()
   createReadStream(target).pipe(response)
