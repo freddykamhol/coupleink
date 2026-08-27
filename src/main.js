@@ -114,7 +114,7 @@ document.querySelector('#app').innerHTML = `
           <div class="field"><label for="contactway">Bevorzugter Kontakt</label><select id="contactway" name="contactway"><option>E-Mail</option><option>Telefon</option><option>WhatsApp</option></select></div>
           <label class="check full"><input type="checkbox" required><span>Ich habe die Datenschutzerklärung gelesen und stimme der Verarbeitung meiner Angaben zur Bearbeitung der Anfrage zu. *</span></label>
           <label class="check full"><input type="checkbox"><span>Ich möchte über Guest Spots und freie Termine informiert werden.</span></label>
-          <div class="form-actions"><button class="back-button" type="button">Zurück</button><button class="submit-button" type="submit">Anfrage absenden ${icon('arrow')}</button></div>
+          <div class="form-actions"><button class="back-button" type="button">Zurück</button><button class="submit-button" type="submit">Anfrage absenden ${icon('arrow')}</button></div><p class="form-submit-error full" role="alert" aria-live="polite"></p>
         </div>
         <div class="form-success"><span>✓</span><h3>Danke für deine Anfrage.</h3><p>Wir schauen uns dein Projekt an und melden uns persönlich bei dir.</p></div>
       </form>
@@ -339,4 +339,16 @@ function showStep(next){ stepEls[step].classList.remove('active'); indicators[st
 form.querySelectorAll('.next-button').forEach(btn => btn.addEventListener('click', () => { const fields = [...stepEls[step].querySelectorAll('[required]')]; const invalid = fields.find(f => !f.checkValidity()); if(invalid){ invalid.reportValidity(); return } showStep(step + 1) }))
 form.querySelectorAll('.back-button').forEach(btn => btn.addEventListener('click', () => showStep(step - 1)))
 document.querySelector('#references').addEventListener('change', e => { const small = e.target.closest('.file-box').querySelector('small'); small.textContent = e.target.files.length ? `${e.target.files.length} Datei(en) ausgewählt` : 'JPG, PNG oder WEBP · max. 10 MB' })
-form.addEventListener('submit', e => { e.preventDefault(); if(!form.checkValidity()){form.reportValidity(); return} stepEls[step].classList.remove('active'); document.querySelector('.form-success').classList.add('active'); form.reset() })
+form.addEventListener('submit',async e => {
+  e.preventDefault()
+  if(!form.checkValidity()){form.reportValidity(); return}
+  const button=form.querySelector('.submit-button'),error=form.querySelector('.form-submit-error')
+  error.textContent=''; button.disabled=true; button.textContent='Anfrage wird gesendet …'
+  try{
+    const response=await fetch(publicAsset('api/inquiries'),{method:'POST',body:new FormData(form)})
+    const result=await response.json().catch(()=>({}))
+    if(!response.ok) throw new Error(result.error||'Anfrage konnte nicht gesendet werden.')
+    stepEls[step].classList.remove('active'); document.querySelector('.form-success').classList.add('active'); form.reset()
+  }catch(submitError){ error.textContent=submitError.message||'Anfrage konnte nicht gesendet werden. Bitte versuche es später erneut.' }
+  finally{ button.disabled=false; button.innerHTML=`Anfrage absenden ${icon('arrow')}` }
+})

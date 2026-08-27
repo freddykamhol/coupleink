@@ -1,5 +1,6 @@
 import { config as loadEnv } from 'dotenv'
 import Busboy from 'busboy'
+import nodemailer from 'nodemailer'
 import { createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { randomUUID } from 'node:crypto'
@@ -57,6 +58,64 @@ const readJson = request => new Promise((resolve,reject) => {
   request.on('error',reject)
 })
 
+const receiveInquiry = request => new Promise((resolve,reject) => {
+  const fields={}
+  const attachments=[]
+  const pending=[]
+  let totalSize=0
+  const parser=Busboy({headers:request.headers,limits:{files:10,fileSize:10*1024*1024,fields:30,fieldSize:20_000}})
+  parser.on('field',(name,value)=>{ fields[name]=value.trim() })
+  parser.on('file',(name,file,info)=>{
+    if(name!=='references'||!['image/jpeg','image/png','image/webp'].includes(info.mimeType)){ file.resume(); return }
+    pending.push(new Promise((done,fail)=>{
+      const chunks=[]
+      let limited=false
+      file.on('data',chunk=>{
+        totalSize+=chunk.length
+        if(totalSize>25*1024*1024){ limited=true; file.resume() }
+        else chunks.push(chunk)
+      })
+      file.on('limit',()=>{ limited=true })
+      file.on('end',()=>{
+        if(limited) fail(new Error('Die Referenzbilder sind zu groß. Maximal 10 MB pro Bild und 25 MB insgesamt.'))
+        else { attachments.push({filename:info.filename,content:Buffer.concat(chunks),contentType:info.mimeType}); done() }
+      })
+      file.on('error',fail)
+    }))
+  })
+  parser.on('close',async()=>{ try{ await Promise.all(pending); resolve({fields,attachments}) }catch(error){ reject(error) } })
+  parser.on('error',reject)
+  request.pipe(parser)
+})
+
+const sendInquiry = async ({fields,attachments}) => {
+  const smtpHost=cleanEnv(process.env.SMTP_HOST)
+  const smtpPort=Number(cleanEnv(process.env.SMTP_PORT)||587)
+  const smtpUser=cleanEnv(process.env.SMTP_USER)
+  const smtpPassword=cleanEnv(process.env.SMTP_PASSWORD)
+  const smtpFrom=cleanEnv(process.env.SMTP_FROM)||smtpUser
+  if(!smtpHost||!smtpUser||!smtpPassword||!smtpFrom) throw new Error('SMTP ist auf dem Server nicht vollständig konfiguriert.')
+  const required=['idea','style','placement','size','firstname','lastname','email','phone','age']
+  if(required.some(name=>!fields[name])) throw new Error('Bitte alle Pflichtfelder ausfüllen.')
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) throw new Error('Bitte eine gültige E-Mail-Adresse angeben.')
+  const labels={idea:'Wunschmotiv',style:'Stilrichtung',artist:'Wunsch-Artist',placement:'Körperstelle',size:'Größe',color:'Farbwunsch',skin:'Vorhandenes Tattoo',budget:'Budget',timing:'Wunschzeitraum',firstname:'Vorname',lastname:'Nachname',email:'E-Mail',phone:'Telefon',age:'Alter',contactway:'Bevorzugter Kontakt'}
+  const text=Object.entries(labels).map(([name,label])=>`${label}: ${fields[name]||'–'}`).join('\n')
+  const transporter=nodemailer.createTransport({
+    host:smtpHost,
+    port:smtpPort,
+    secure:(cleanEnv(process.env.SMTP_SECURE)||String(smtpPort===465)).toLowerCase()==='true',
+    auth:{user:smtpUser,pass:smtpPassword}
+  })
+  await transporter.sendMail({
+    from:smtpFrom,
+    to:'kontakt@coupleink.de',
+    replyTo:fields.email,
+    subject:`Neue Tattoo-Anfrage von ${fields.firstname} ${fields.lastname}`,
+    text:`Neue Anfrage über coupleink.de\n\n${text}`,
+    attachments
+  })
+}
+
 const isAdmin = request => {
   const cookies = Object.fromEntries((request.headers.cookie||'').split(';').map(value=>value.trim().split('=')))
   return Boolean(cookies.coupleink_admin&&adminSessions.has(cookies.coupleink_admin))
@@ -107,6 +166,14 @@ createServer(async (request,response) => {
     if(!isAdmin(request)) return json(response,401,{error:'Bitte erneut anmelden.'})
     try{ return json(response,201,{files:await receiveUploads(request)}) }
     catch(error){ return json(response,400,{error:error.message||'Upload fehlgeschlagen.'}) }
+  }
+
+  if(request.method==='POST' && url.pathname==='/api/inquiries'){
+    try{
+      const inquiry=await receiveInquiry(request)
+      await sendInquiry(inquiry)
+      return json(response,201,{ok:true})
+    }catch(error){ return json(response,400,{error:error.message||'Anfrage konnte nicht gesendet werden.'}) }
   }
 
   if(request.method==='GET' && url.pathname==='/api/gallery'){
