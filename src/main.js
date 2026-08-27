@@ -26,6 +26,7 @@ const defaultWorks = [
 let artists = JSON.parse(localStorage.getItem('coupleink-artists') || 'null') || defaultArtists
 let works = JSON.parse(localStorage.getItem('coupleink-works') || 'null') || defaultWorks
 works.forEach(work => { if(work.src?.startsWith('/images/')) work.src = publicAsset(work.src) })
+const isUpload = work => work.src?.includes('uploads/')
 // Bezeichnungen aus der ersten Admin-Version verständlicher migrieren.
 artists.forEach(artist => {
   if(artist.id === 'artist-3' && ['Artist 03','Resident Artist I'].includes(artist.name)) artist.name = 'Lena'
@@ -188,6 +189,26 @@ function renderGallery(){
 }
 renderGallery()
 
+async function loadServerGallery(){
+  try{
+    const response=await fetch(publicAsset('api/gallery'),{cache:'no-store'})
+    if(!response.ok) return
+    const result=await response.json()
+    const serverWorks=result.files.map(file=>({
+      id:`upload-${file.src}`,
+      artist:file.artist,
+      src:publicAsset(file.src),
+      filename:file.filename
+    }))
+    works=[...works.filter(work=>!isUpload(work)),...serverWorks]
+    artists.forEach(artist=>normalizeArtistImages(artist.id))
+    renderGallery()
+    renderAdmin()
+  }catch{
+    // Bei einem reinen Vite-Frontend bleiben die eingebauten Bilder sichtbar.
+  }
+}
+
 const admin = document.querySelector('.admin-panel'), adminStatus = admin.querySelector('.admin-status')
 const adminLogin = document.querySelector('.admin-login')
 const adminSessionKey = 'coupleink-admin-authenticated'
@@ -237,6 +258,7 @@ admin.querySelector('.select-all-images').addEventListener('change',e=>{ selecte
 admin.querySelector('.bulk-delete').addEventListener('click',()=>{ if(!selectedImages.size||!confirm(`${selectedImages.size} ausgewählte Bilder wirklich löschen?`))return; const affected=new Set(works.filter(w=>selectedImages.has(w.id)).map(w=>w.artist)); works=works.filter(w=>!selectedImages.has(w.id)); selectedImages.clear(); affected.forEach(normalizeArtistImages); persist(); adminStatus.textContent='Die ausgewählten Bilder wurden gelöscht.' })
 admin.querySelector('.admin-upload').addEventListener('submit',async e=>{ e.preventDefault(); const form=e.currentTarget,files=[...form.elements.images.files],artist=form.elements.artist.value; if(!files.length)return; let added=0; try{ for(const file of files){ adminStatus.textContent=`Bild ${added+1} von ${files.length} wird hochgeladen …`; const data=new FormData(); data.append('artist',artist); data.append('images',file); const response=await fetch(publicAsset('api/admin/uploads'),{method:'POST',body:data}); const body=await response.text(); let result; try{ result=JSON.parse(body) }catch{ throw new Error(`Upload fehlgeschlagen (HTTP ${response.status}). Der Server lieferte keine gültige API-Antwort.`) } if(!response.ok)throw new Error(result.error||`Upload fehlgeschlagen (HTTP ${response.status}).`); result.files.forEach(serverFile=>works.push({id:`w${Date.now()}-${added}`,artist,src:publicAsset(serverFile.src)})); added+=result.files.length } normalizeArtistImages(artist); persist(); form.reset(); adminStatus.textContent=`${added} Bilder wurden dauerhaft auf dem Server gespeichert.` }catch(error){ if(added){ normalizeArtistImages(artist); persist() } adminStatus.textContent=`${added} von ${files.length} Bildern gespeichert. ${error.message||'Upload fehlgeschlagen.'}` } })
 renderAdmin()
+loadServerGallery()
 if(new URLSearchParams(location.search).has('admin')) openAdmin()
 
 const studioPosition = [49.0513305, 8.2654164]

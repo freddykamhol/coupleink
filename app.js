@@ -1,6 +1,6 @@
 import { config as loadEnv } from 'dotenv'
 import Busboy from 'busboy'
-import { createReadStream, createWriteStream, existsSync, mkdirSync, statSync, unlinkSync } from 'node:fs'
+import { createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { randomUUID } from 'node:crypto'
 import { extname, join, normalize, resolve, sep } from 'node:path'
@@ -26,6 +26,28 @@ const mimeTypes = {'.html':'text/html; charset=utf-8','.js':'text/javascript; ch
 const json = (response,status,body,headers={}) => {
   response.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers})
   response.end(JSON.stringify(body))
+}
+
+const listUploads = () => {
+  if(!existsSync(uploadRoot)) return []
+  const files=[]
+  const visit = (directory,parts=[]) => {
+    for(const entry of readdirSync(directory,{withFileTypes:true})){
+      const nextParts=[...parts,entry.name]
+      const target=join(directory,entry.name)
+      if(entry.isDirectory()) visit(target,nextParts)
+      else if(entry.isFile()&&mimeTypes[extname(entry.name).toLowerCase()]?.startsWith('image/')){
+        const [artist]=nextParts
+        if(artist) files.push({
+          artist,
+          src:`uploads/${nextParts.map(encodeURIComponent).join('/')}`,
+          filename:entry.name
+        })
+      }
+    }
+  }
+  visit(uploadRoot)
+  return files.sort((a,b)=>a.src.localeCompare(b.src))
 }
 
 const readJson = request => new Promise((resolve,reject) => {
@@ -85,6 +107,11 @@ createServer(async (request,response) => {
     if(!isAdmin(request)) return json(response,401,{error:'Bitte erneut anmelden.'})
     try{ return json(response,201,{files:await receiveUploads(request)}) }
     catch(error){ return json(response,400,{error:error.message||'Upload fehlgeschlagen.'}) }
+  }
+
+  if(request.method==='GET' && url.pathname==='/api/gallery'){
+    try{ return json(response,200,{files:listUploads()}) }
+    catch(error){ return json(response,500,{error:'Galerie konnte nicht geladen werden.'}) }
   }
 
   if(request.method!=='GET'&&request.method!=='HEAD') return json(response,405,{error:'Methode nicht erlaubt.'})
