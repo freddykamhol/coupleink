@@ -18,21 +18,8 @@ const defaultArtists = [
   {id:'fabi', name:'Fabi'}, {id:'katharine', name:'Katharine'},
   {id:'artist-3', name:'Lena'}, {id:'artist-4', name:'Max'}
 ]
-const defaultWorks = [
-  {id:'w1',artist:'fabi',src:publicAsset('images/IMG_6562.jpg')}, {id:'w2',artist:'katharine',src:publicAsset('images/IMG_6404.jpg')},
-  {id:'w3',artist:'fabi',src:publicAsset('images/IMG_6632.jpg')}, {id:'w4',artist:'katharine',src:publicAsset('images/IMG_6722.jpg')},
-  {id:'w5',artist:'fabi',src:publicAsset('images/IMG_6489.jpg')}, {id:'w6',artist:'katharine',src:publicAsset('images/IMG_7446.jpg')}
-]
-let artists = JSON.parse(localStorage.getItem('coupleink-artists') || 'null') || defaultArtists
-let works = JSON.parse(localStorage.getItem('coupleink-works') || 'null') || defaultWorks
-works.forEach(work => { if(work.src?.startsWith('/images/')) work.src = publicAsset(work.src) })
-const isUpload = work => work.src?.includes('uploads/')
-// Bezeichnungen aus der ersten Admin-Version verständlicher migrieren.
-artists.forEach(artist => {
-  if(artist.id === 'artist-3' && ['Artist 03','Resident Artist I'].includes(artist.name)) artist.name = 'Lena'
-  if(artist.id === 'artist-4' && ['Artist 04','Resident Artist II'].includes(artist.name)) artist.name = 'Max'
-})
-localStorage.setItem('coupleink-artists', JSON.stringify(artists))
+let artists = defaultArtists.map(artist=>({...artist}))
+let works = []
 
 document.querySelector('#app').innerHTML = `
   <header class="site-header">
@@ -189,24 +176,38 @@ function renderGallery(){
 }
 renderGallery()
 
+function applyServerGallery(result){
+  artists=result.artists
+  works=result.files.map(file=>({...file,src:publicAsset(file.src)}))
+  if(!artists.some(artist=>artist.id===activeArtist)) activeArtist=artists[0]?.id
+  selectedImages=new Set([...selectedImages].filter(id=>works.some(work=>work.id===id)))
+  artists.forEach(artist=>normalizeArtistImages(artist.id))
+  renderGallery(); renderAdmin()
+}
+let galleryRequest=0
 async function loadServerGallery(){
+  const request=++galleryRequest
   try{
     const response=await fetch(publicAsset('api/gallery'),{cache:'no-store'})
-    if(!response.ok) return
+    if(!response.ok) throw new Error('Galerie konnte nicht geladen werden.')
     const result=await response.json()
-    const serverWorks=result.files.map(file=>({
-      id:`upload-${file.src}`,
-      artist:file.artist,
-      src:publicAsset(file.src),
-      filename:file.filename
-    }))
-    works=[...works.filter(work=>!isUpload(work)),...serverWorks]
-    artists.forEach(artist=>normalizeArtistImages(artist.id))
-    renderGallery()
-    renderAdmin()
-  }catch{
-    // Bei einem reinen Vite-Frontend bleiben die eingebauten Bilder sichtbar.
-  }
+    if(request===galleryRequest) applyServerGallery(result)
+  }catch{ adminStatus.textContent='Server nicht erreichbar. Galerie bitte erneut laden.' }
+}
+let savingGallery=false
+async function changeGallery(change){
+  if(savingGallery) return
+  savingGallery=true
+  ++galleryRequest
+  adminStatus.textContent='?nderung wird gespeichert ?'
+  try{
+    const response=await fetch(publicAsset('api/admin/gallery'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(change)})
+    const result=await response.json()
+    if(!response.ok) throw new Error(result.error||'Speichern fehlgeschlagen.')
+    applyServerGallery(result)
+    adminStatus.textContent='?nderung wurde f?r alle Ger?te gespeichert.'
+  }catch(error){ renderAdmin(); adminStatus.textContent=error.message||'Speichern fehlgeschlagen.' }
+  finally{ savingGallery=false }
 }
 
 const admin = document.querySelector('.admin-panel'), adminStatus = admin.querySelector('.admin-status')
@@ -223,19 +224,13 @@ function normalizeArtistImages(artistId){
   works.filter(w=>w.artist===artistId).forEach((work,index)=>{ work.filename=`${cleanArtistName(artist?.name)}_${String(index+1).padStart(3,'0')}` })
 }
 artists.forEach(artist=>normalizeArtistImages(artist.id))
-const persist = () => {
-  let saved=true
-  try{ localStorage.setItem('coupleink-artists',JSON.stringify(artists)); localStorage.setItem('coupleink-works',JSON.stringify(works)) }
-  catch{ saved=false; adminStatus.textContent='Browserspeicher voll: Die letzten Änderungen sind nur bis zum Neuladen sichtbar.' }
-  renderGallery(); renderAdmin(); return saved
-}
 function renderAdmin(){
   admin.querySelector('.admin-artists').innerHTML = artists.map((a,i)=>`<label><span>Artist 0${i+1}</span><input data-artist-name="${a.id}" value="${a.name}" maxlength="30"></label>`).join('')
   admin.querySelector('[name="artist"]').innerHTML = artists.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')
   admin.querySelector('.admin-images').innerHTML = works.length ? works.map(w=>`<article class="${selectedImages.has(w.id)?'selected':''}"><label class="image-select"><input type="checkbox" data-select-image="${w.id}" ${selectedImages.has(w.id)?'checked':''}><span>✓</span></label><img src="${w.src}" alt=""><div><strong>${w.filename}</strong><small>${artists.find(a=>a.id===w.artist)?.name}</small><select data-move="${w.id}">${artists.map(a=>`<option value="${a.id}" ${a.id===w.artist?'selected':''}>${a.name}</option>`).join('')}</select></div><button data-delete="${w.id}" aria-label="Bild löschen">×</button></article>`).join('') : '<p>Noch keine Bilder vorhanden.</p>'
-  admin.querySelectorAll('[data-artist-name]').forEach(input => input.addEventListener('change', () => { const artist=artists.find(a=>a.id===input.dataset.artistName); artist.name=input.value.trim()||artist.name; normalizeArtistImages(artist.id); persist() }))
-  admin.querySelectorAll('[data-move]').forEach(select => select.addEventListener('change', () => { const work=works.find(w=>w.id===select.dataset.move),oldArtist=work.artist; work.artist=select.value; normalizeArtistImages(oldArtist); normalizeArtistImages(work.artist); persist() }))
-  admin.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', () => { if(confirm('Dieses Bild wirklich aus der Galerie entfernen?')){ const artist=works.find(w=>w.id===btn.dataset.delete)?.artist; works=works.filter(w=>w.id!==btn.dataset.delete); selectedImages.delete(btn.dataset.delete); normalizeArtistImages(artist); persist() } }))
+  admin.querySelectorAll('[data-artist-name]').forEach(input=>input.addEventListener('change',()=>changeGallery({action:'artist',id:input.dataset.artistName,name:input.value.trim()})))
+  admin.querySelectorAll('[data-move]').forEach(select=>select.addEventListener('change',()=>changeGallery({action:'move',ids:[select.dataset.move],artist:select.value})))
+  admin.querySelectorAll('[data-delete]').forEach(btn=>btn.addEventListener('click',()=>{ if(confirm('Dieses Bild wirklich f?r alle Ger?te aus der Galerie entfernen?')) changeGallery({action:'delete',ids:[btn.dataset.delete]}) }))
   admin.querySelectorAll('[data-select-image]').forEach(input=>input.addEventListener('change',()=>{ input.checked?selectedImages.add(input.dataset.selectImage):selectedImages.delete(input.dataset.selectImage); renderAdmin() }))
   const all=works.length>0&&selectedImages.size===works.length,selectAll=admin.querySelector('.select-all-images'),bulkDelete=admin.querySelector('.bulk-delete')
   selectAll.checked=all; selectAll.indeterminate=selectedImages.size>0&&!all; bulkDelete.disabled=selectedImages.size===0; bulkDelete.textContent=selectedImages.size?`${selectedImages.size} Bilder löschen`:'Auswahl löschen'
@@ -253,12 +248,14 @@ adminLogin.querySelector('form').addEventListener('submit',async event=>{
     sessionStorage.setItem(adminSessionKey,'true'); form.reset(); adminLogin.close(); admin.showModal()
   }catch{ error.textContent='Anmeldung derzeit nicht erreichbar.' }
 })
-admin.querySelector('.admin-add-artist').addEventListener('submit',e=>{ e.preventDefault(); const name=new FormData(e.currentTarget).get('name').trim(); if(!name)return; const id=`artist-${Date.now()}`; artists.push({id,name}); activeArtist=id; e.currentTarget.reset(); persist(); adminStatus.textContent=`${name} wurde als Artist angelegt.` })
+admin.querySelector('.admin-add-artist').addEventListener('submit',e=>{ e.preventDefault(); const name=new FormData(e.currentTarget).get('name').trim(); if(name) changeGallery({action:'artist',id:'artist-'+Date.now(),name}) })
 admin.querySelector('.select-all-images').addEventListener('change',e=>{ selectedImages=e.target.checked?new Set(works.map(w=>w.id)):new Set(); renderAdmin() })
-admin.querySelector('.bulk-delete').addEventListener('click',()=>{ if(!selectedImages.size||!confirm(`${selectedImages.size} ausgewählte Bilder wirklich löschen?`))return; const affected=new Set(works.filter(w=>selectedImages.has(w.id)).map(w=>w.artist)); works=works.filter(w=>!selectedImages.has(w.id)); selectedImages.clear(); affected.forEach(normalizeArtistImages); persist(); adminStatus.textContent='Die ausgewählten Bilder wurden gelöscht.' })
-admin.querySelector('.admin-upload').addEventListener('submit',async e=>{ e.preventDefault(); const form=e.currentTarget,files=[...form.elements.images.files],artist=form.elements.artist.value; if(!files.length)return; let added=0; try{ for(const file of files){ adminStatus.textContent=`Bild ${added+1} von ${files.length} wird hochgeladen …`; const data=new FormData(); data.append('artist',artist); data.append('images',file); const response=await fetch(publicAsset('api/admin/uploads'),{method:'POST',body:data}); const body=await response.text(); let result; try{ result=JSON.parse(body) }catch{ throw new Error(`Upload fehlgeschlagen (HTTP ${response.status}). Der Server lieferte keine gültige API-Antwort.`) } if(!response.ok)throw new Error(result.error||`Upload fehlgeschlagen (HTTP ${response.status}).`); result.files.forEach(serverFile=>works.push({id:`w${Date.now()}-${added}`,artist,src:publicAsset(serverFile.src)})); added+=result.files.length } normalizeArtistImages(artist); persist(); form.reset(); adminStatus.textContent=`${added} Bilder wurden dauerhaft auf dem Server gespeichert.` }catch(error){ if(added){ normalizeArtistImages(artist); persist() } adminStatus.textContent=`${added} von ${files.length} Bildern gespeichert. ${error.message||'Upload fehlgeschlagen.'}` } })
+admin.querySelector('.bulk-delete').addEventListener('click',()=>{ if(selectedImages.size&&confirm(selectedImages.size+' ausgew?hlte Bilder f?r alle Ger?te l?schen?')) changeGallery({action:'delete',ids:[...selectedImages]}) })
+admin.querySelector('.admin-upload').addEventListener('submit',async e=>{ e.preventDefault(); const form=e.currentTarget,files=[...form.elements.images.files],artist=form.elements.artist.value; if(!files.length)return; let added=0; try{ for(const file of files){ adminStatus.textContent=`Bild ${added+1} von ${files.length} wird hochgeladen …`; const data=new FormData(); data.append('artist',artist); data.append('images',file); const response=await fetch(publicAsset('api/admin/uploads'),{method:'POST',body:data}); const body=await response.text(); let result; try{ result=JSON.parse(body) }catch{ throw new Error(`Upload fehlgeschlagen (HTTP ${response.status}). Der Server lieferte keine gültige API-Antwort.`) } if(!response.ok)throw new Error(result.error||`Upload fehlgeschlagen (HTTP ${response.status}).`); result.files.forEach(serverFile=>works.push({id:`w${Date.now()}-${added}`,artist,src:publicAsset(serverFile.src)})); added+=result.files.length } await loadServerGallery(); form.reset(); adminStatus.textContent=`${added} Bilder wurden dauerhaft auf dem Server gespeichert.` }catch(error){ if(added){ await loadServerGallery() } adminStatus.textContent=`${added} von ${files.length} Bildern gespeichert. ${error.message||'Upload fehlgeschlagen.'}` } })
 renderAdmin()
 loadServerGallery()
+setInterval(()=>{ if(!document.hidden&&!admin.open&&!savingGallery) loadServerGallery() },15000)
+window.addEventListener('focus',()=>{ if(!savingGallery) loadServerGallery() })
 if(new URLSearchParams(location.search).has('admin')) openAdmin()
 
 const studioPosition = [49.0513305, 8.2654164]

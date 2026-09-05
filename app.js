@@ -1,7 +1,7 @@
 import { config as loadEnv } from 'dotenv'
 import Busboy from 'busboy'
 import nodemailer from 'nodemailer'
-import { createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs'
+import { createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync, statSync, unlinkSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { randomUUID } from 'node:crypto'
 import { extname, join, normalize, resolve, sep } from 'node:path'
@@ -49,6 +49,38 @@ const listUploads = () => {
   }
   visit(uploadRoot)
   return files.sort((a,b)=>a.src.localeCompare(b.src))
+}
+
+const galleryStatePath = join(uploadRoot,'gallery-state.json')
+const initialArtists = [{id:'fabi',name:'Fabi'},{id:'katharine',name:'Katharine'},{id:'artist-3',name:'Lena'},{id:'artist-4',name:'Max'}]
+const initialWorks = ['6562','6404','6632','6722','6489','7446'].map((number,index)=>({id:'w'+(index+1),artist:index%2?'katharine':'fabi',src:'images/IMG_'+number+'.jpg'}))
+const readGalleryState = () => existsSync(galleryStatePath)?JSON.parse(readFileSync(galleryStatePath,'utf8')):{artists:initialArtists,overrides:{},deleted:[]}
+const gallerySnapshot = (state=readGalleryState()) => {
+  const files=[...initialWorks,...listUploads().map(file=>({...file,id:'upload-'+file.src}))].filter(file=>!state.deleted.includes(file.id)).map(file=>({...file,artist:state.overrides[file.id]||file.artist}))
+  const artists=[...state.artists]
+  for(const file of files) if(!artists.some(artist=>artist.id===file.artist)) artists.push({id:file.artist,name:file.artist})
+  return {artists,files}
+}
+const updateGallery = body => {
+  const state=readGalleryState(),snapshot=gallerySnapshot(state)
+  if(body.action==='delete'||body.action==='move'){
+    if(!Array.isArray(body.ids)||!body.ids.length||body.ids.some(id=>typeof id!=='string'||!snapshot.files.some(file=>file.id===id))) throw new Error('Bild nicht mehr vorhanden. Bitte Galerie neu laden.')
+    if(body.action==='move'){
+      if(!snapshot.artists.some(artist=>artist.id===body.artist)) throw new Error('Artist nicht vorhanden.')
+      for(const id of body.ids) state.overrides[id]=body.artist
+    }else state.deleted=[...new Set([...state.deleted,...body.ids])]
+  }else if(body.action==='artist'){
+    if(typeof body.id!=='string'||!/^[-a-z0-9_]{1,60}$/.test(body.id)||typeof body.name!=='string'||!body.name.trim()||body.name.length>30) throw new Error('Ung?ltiger Artist.')
+    state.artists=snapshot.artists
+    const artist=state.artists.find(artist=>artist.id===body.id)
+    if(artist) artist.name=body.name.trim()
+    else state.artists.push({id:body.id,name:body.name.trim()})
+  }else throw new Error('Ung?ltige Galerie-Aktion.')
+  mkdirSync(uploadRoot,{recursive:true})
+  const temporary=galleryStatePath+'.'+randomUUID()+'.tmp'
+  writeFileSync(temporary,JSON.stringify(state),'utf8')
+  renameSync(temporary,galleryStatePath)
+  return gallerySnapshot(state)
 }
 
 const readJson = request => new Promise((resolve,reject) => {
@@ -168,6 +200,12 @@ createServer(async (request,response) => {
     catch(error){ return json(response,400,{error:error.message||'Upload fehlgeschlagen.'}) }
   }
 
+  if(request.method==='POST' && url.pathname==='/api/admin/gallery'){
+    if(!isAdmin(request)) return json(response,401,{error:'Bitte erneut anmelden.'})
+    try{ return json(response,200,updateGallery(await readJson(request))) }
+    catch(error){ return json(response,400,{error:error.message||'Speichern fehlgeschlagen.'}) }
+  }
+
   if(request.method==='POST' && url.pathname==='/api/inquiries'){
     try{
       const inquiry=await receiveInquiry(request)
@@ -177,12 +215,20 @@ createServer(async (request,response) => {
   }
 
   if(request.method==='GET' && url.pathname==='/api/gallery'){
-    try{ return json(response,200,{files:listUploads()}) }
+    try{ return json(response,200,gallerySnapshot()) }
     catch(error){ return json(response,500,{error:'Galerie konnte nicht geladen werden.'}) }
   }
 
   if(request.method!=='GET'&&request.method!=='HEAD') return json(response,405,{error:'Methode nicht erlaubt.'})
   const relative = decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html'
+  if(!['index.html','favicon.svg','icons.svg'].includes(relative)&&!['assets/','images/','uploads/'].some(prefix=>relative.startsWith(prefix))) return json(response,404,{error:'Nicht gefunden.'})
+  if(relative.split('/').some(part=>part.startsWith('.'))||relative.endsWith('.json')||relative.endsWith('.tmp')) return json(response,404,{error:'Nicht gefunden.'})
+  if(relative.startsWith('images/')||relative.startsWith('uploads/')){
+    try{
+      const id=relative.startsWith('uploads/')?'upload-uploads/'+relative.slice(8).split('/').map(encodeURIComponent).join('/'):initialWorks.find(work=>work.src===relative)?.id
+      if(id&&readGalleryState().deleted.includes(id)) return json(response,404,{error:'Bild nicht gefunden.'})
+    }catch{ return json(response,500,{error:'Bild konnte nicht geladen werden.'}) }
+  }
   const servesUpload = relative.startsWith('uploads/')
   const servingRoot = servesUpload?uploadRoot:root
   const servingPath = servesUpload?relative.slice('uploads/'.length):relative
