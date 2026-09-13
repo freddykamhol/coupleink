@@ -99,8 +99,8 @@ document.querySelector('#app').innerHTML = `
           <div class="field"><label for="phone">Telefon *</label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div>
           <div class="field"><label for="age">Alter *</label><input id="age" name="age" type="number" min="18" max="99" required placeholder="Mindestens 18"></div>
           <div class="field"><label for="contactway">Bevorzugter Kontakt</label><select id="contactway" name="contactway"><option>E-Mail</option><option>Telefon</option><option>WhatsApp</option></select></div>
-          <label class="check full"><input type="checkbox" required><span>Ich habe die Datenschutzerklärung gelesen und stimme der Verarbeitung meiner Angaben zur Bearbeitung der Anfrage zu. *</span></label>
-          <label class="check full"><input type="checkbox"><span>Ich möchte über Guest Spots und freie Termine informiert werden.</span></label>
+          <label class="check full"><input type="checkbox" required><span>Ich habe die <a href="/datenschutz.html#anfragen" target="_blank">Datenschutzerklärung</a> zur Verarbeitung meiner Angaben für die Bearbeitung der Anfrage zur Kenntnis genommen. *</span></label>
+          <label class="check full"><input type="checkbox" name="health-consent" value="erteilt" required><span>Soweit meine freiwilligen Angaben oder Referenzbilder Gesundheitsdaten erkennen lassen, willige ich ausdrücklich in deren Verarbeitung zur Beratung und Bearbeitung meiner Tattoo-Anfrage ein. Die Einwilligung kann ich jederzeit mit Wirkung für die Zukunft widerrufen. *</span></label>
           <div class="form-actions"><button class="back-button" type="button">Zurück</button><button class="submit-button" type="submit">Anfrage absenden ${icon('arrow')}</button></div><p class="form-submit-error full" role="alert" aria-live="polite"></p>
         </div>
         <div class="form-success"><span>✓</span><h3>Danke für deine Anfrage.</h3><p>Wir schauen uns dein Projekt an und melden uns persönlich bei dir.</p></div>
@@ -108,8 +108,15 @@ document.querySelector('#app').innerHTML = `
     </section>
 
     <section id="contact" class="location-section">
-      <div class="map-wrap reveal">
+      <div class="map-wrap reveal" data-map-state="blocked">
         <div id="studio-map" aria-label="Interaktive Karte zum Couple Ink Tattoo Studio"></div>
+        <div class="map-consent">
+          <small>Externer Inhalt</small>
+          <h3>OpenStreetMap anzeigen</h3>
+          <p>Beim Laden werden Ihre IP-Adresse und technische Verbindungsdaten an die OpenStreetMap Foundation übertragen.</p>
+          <button class="map-consent-button" type="button">Karte laden</button>
+          <a href="/datenschutz.html#openstreetmap">Mehr zum Datenschutz</a>
+        </div>
         <div class="map-shade"></div>
         <div class="map-coordinates">49°03' N<br>08°15' E</div>
       </div>
@@ -126,10 +133,15 @@ document.querySelector('#app').innerHTML = `
   <footer>
     <div class="footer-top"><p>Bereit für etwas,<br>das bleibt?</p><a href="#booking">Let's talk. ${icon('arrow')}</a></div>
     <div class="footer-grid"><div><img src="${publicAsset('images/Logo-1.png')}" alt="Couple Ink"><p>Tattoo Studio<br>Wörth am Rhein</p></div><div><h3>Kontakt</h3><a href="tel:+4915562913149">+49 15562 913149</a><a href="mailto:kontakt@coupleink.de">kontakt@coupleink.de</a></div><div><h3>Navigation</h3><a href="#works">Arbeiten</a><a href="#story">Über uns</a><a href="#booking">Termin</a></div><div><h3>Social</h3><a href="https://www.instagram.com/coupleink_woerth/" target="_blank" rel="noopener noreferrer" aria-label="Couple Ink auf Instagram öffnen">@coupleink_woerth ${icon('instagram')}</a></div></div>
-    <div class="footer-bottom"><span>© ${new Date().getFullYear()} Couple Ink</span><div><a href="https://coupleink.de/impressum/">Impressum</a><a href="https://coupleink.de/datenschutzerklaerung/">Datenschutz</a><a href="https://coupleink.de/agb/">AGB</a><a href="?admin=1">Admin</a></div><a href="#top">Nach oben ↑</a></div>
+    <div class="footer-bottom"><span>© ${new Date().getFullYear()} Couple Ink</span><div><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a><a href="/cookie-hinweise.html">Cookie-Hinweise</a><button class="consent-settings-link" type="button">Cookie-Einstellungen</button><a href="https://coupleink.de/agb/">AGB</a><a href="?admin=1">Admin</a></div><a href="#top">Nach oben ↑</a></div>
   </footer>
 
   <dialog class="lightbox"><button aria-label="Schließen">${icon('close')}</button><img alt="Tattoo-Arbeit vergrößert"><p></p></dialog>
+  <section class="consent-banner" role="dialog" aria-modal="true" aria-labelledby="consent-title" hidden>
+    <div class="consent-copy"><small>Datenschutz-Einstellungen</small><h2 id="consent-title">Ihre Privatsphäre</h2><p>Notwendige Speicherungen sichern den Betrieb der Website. Die externe OpenStreetMap-Karte laden wir nur mit Ihrer Einwilligung. Sie können Ihre Auswahl jederzeit ändern.</p><div class="consent-links"><a href="/datenschutz.html">Datenschutz</a><a href="/cookie-hinweise.html">Cookie-Hinweise</a><a href="/impressum.html">Impressum</a></div></div>
+    <div class="consent-options"><label><span><strong>Notwendig</strong><small>Admin-Sitzung und Speicherung Ihrer Einwilligungsentscheidung</small></span><input type="checkbox" checked disabled></label><label><span><strong>Externe Karte</strong><small>OpenStreetMap Foundation, Großbritannien</small></span><input class="consent-map-toggle" type="checkbox"></label></div>
+    <div class="consent-actions"><button class="consent-necessary" type="button">Nur notwendige</button><button class="consent-save" type="button">Auswahl speichern</button><button class="consent-all" type="button">Alle akzeptieren</button></div>
+  </section>
   <dialog class="admin-login">
     <form class="admin-login-form">
       <button class="admin-login-close" type="button" aria-label="Anmeldung schließen">${icon('close')}</button>
@@ -259,18 +271,61 @@ window.addEventListener('focus',()=>{ if(!savingGallery) loadServerGallery() })
 if(new URLSearchParams(location.search).has('admin')) openAdmin()
 
 const studioPosition = [49.0513305, 8.2654164]
-const studioMap = L.map('studio-map', {zoomControl:false, scrollWheelZoom:false}).setView(studioPosition, 16)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom:19,
-  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-}).addTo(studioMap)
-L.control.zoom({position:'bottomleft'}).addTo(studioMap)
-const studioIcon = L.divIcon({
-  className:'studio-map-marker',
-  html:`<span><img src="${publicAsset('images/Logo-1.png')}" alt=""></span><i></i>`,
-  iconSize:[76,92], iconAnchor:[38,92]
-})
-L.marker(studioPosition,{icon:studioIcon,title:'Couple Ink Tattoo'}).addTo(studioMap).bindPopup('<strong>Couple Ink Tattoo</strong><br>Ottstraße 23A')
+const consentKey = 'coupleink_consent_v1'
+const consentMaxAge = 183 * 24 * 60 * 60 * 1000
+const consentBanner = document.querySelector('.consent-banner')
+const consentMapToggle = consentBanner.querySelector('.consent-map-toggle')
+const mapWrap = document.querySelector('.map-wrap')
+let studioMap
+
+const readConsent = () => {
+  try {
+    const value = JSON.parse(localStorage.getItem(consentKey) || 'null')
+    if (!value || Date.now() - value.savedAt > consentMaxAge) return null
+    return value
+  } catch { return null }
+}
+const loadMap = () => {
+  if (studioMap) return
+  mapWrap.dataset.mapState = 'loading'
+  studioMap = L.map('studio-map', {zoomControl:false, scrollWheelZoom:false}).setView(studioPosition, 16)
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom:19,
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+  }).addTo(studioMap)
+  L.control.zoom({position:'bottomleft'}).addTo(studioMap)
+  const studioIcon = L.divIcon({
+    className:'studio-map-marker',
+    html:`<span><img src="${publicAsset('images/Logo-1.png')}" alt=""></span><i></i>`,
+    iconSize:[76,92], iconAnchor:[38,92]
+  })
+  L.marker(studioPosition,{icon:studioIcon,title:'Couple Ink Tattoo'}).addTo(studioMap).bindPopup('<strong>Couple Ink Tattoo</strong><br>Ottstraße 23A')
+  mapWrap.dataset.mapState = 'active'
+}
+const saveConsent = map => {
+  localStorage.setItem(consentKey, JSON.stringify({necessary:true,map,savedAt:Date.now()}))
+  consentBanner.hidden = true
+  if (map) loadMap()
+  else if (studioMap) {
+    studioMap.remove()
+    studioMap = undefined
+    document.querySelector('#studio-map').replaceChildren()
+    mapWrap.dataset.mapState = 'blocked'
+  }
+}
+const openConsent = () => {
+  consentMapToggle.checked = Boolean(readConsent()?.map)
+  consentBanner.hidden = false
+}
+
+consentBanner.querySelector('.consent-all').addEventListener('click', () => saveConsent(true))
+consentBanner.querySelector('.consent-necessary').addEventListener('click', () => saveConsent(false))
+consentBanner.querySelector('.consent-save').addEventListener('click', () => saveConsent(consentMapToggle.checked))
+document.querySelector('.consent-settings-link').addEventListener('click', openConsent)
+document.querySelector('.map-consent-button').addEventListener('click', () => saveConsent(true))
+const storedConsent = readConsent()
+if (storedConsent?.map) loadMap()
+if (!storedConsent || new URLSearchParams(location.search).get('consent') === 'settings') openConsent()
 
 const form = document.querySelector('#tattoo-form'), stepEls = [...form.querySelectorAll('.form-step')], indicators = [...document.querySelectorAll('.steps span')]
 

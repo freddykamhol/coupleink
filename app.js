@@ -7,7 +7,7 @@ import { randomUUID } from 'node:crypto'
 import { extname, join, normalize, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const root = fileURLToPath(new URL('.', import.meta.url))
+const root = resolve(fileURLToPath(new URL('.', import.meta.url)))
 // Plesk kann Node mit einem anderen Arbeitsverzeichnis starten. Deshalb wird
 // die .env immer relativ zu dieser Startdatei geladen und nicht relativ zu cwd.
 loadEnv({path:join(root,'.env'),override:true,quiet:true})
@@ -129,8 +129,10 @@ const sendInquiry = async ({fields,attachments}) => {
   if(!smtpHost||!smtpUser||!smtpPassword||!smtpFrom) throw new Error('SMTP ist auf dem Server nicht vollständig konfiguriert.')
   const required=['idea','style','placement','size','firstname','lastname','email','phone','age']
   if(required.some(name=>!fields[name])) throw new Error('Bitte alle Pflichtfelder ausfüllen.')
+  if(!/^\d{1,3}$/.test(fields.age)||Number(fields.age)<18) throw new Error('Anfragen sind erst ab 18 Jahren möglich.')
+  if(fields['health-consent']!=='erteilt') throw new Error('Die ausdrückliche Einwilligung zur Verarbeitung möglicher Gesundheitsdaten fehlt.')
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) throw new Error('Bitte eine gültige E-Mail-Adresse angeben.')
-  const labels={idea:'Wunschmotiv',style:'Stilrichtung',artist:'Wunsch-Artist',placement:'Körperstelle',size:'Größe',color:'Farbwunsch',skin:'Vorhandenes Tattoo',budget:'Budget',timing:'Wunschzeitraum',firstname:'Vorname',lastname:'Nachname',email:'E-Mail',phone:'Telefon',age:'Alter',contactway:'Bevorzugter Kontakt'}
+  const labels={idea:'Wunschmotiv',style:'Stilrichtung',artist:'Wunsch-Artist',placement:'Körperstelle',size:'Größe',color:'Farbwunsch',skin:'Vorhandenes Tattoo',budget:'Budget',timing:'Wunschzeitraum',firstname:'Vorname',lastname:'Nachname',email:'E-Mail',phone:'Telefon',age:'Alter',contactway:'Bevorzugter Kontakt','health-consent':'Einwilligung mögliche Gesundheitsdaten'}
   const text=Object.entries(labels).map(([name,label])=>`${label}: ${fields[name]||'–'}`).join('\n')
   const transporter=nodemailer.createTransport({
     host:smtpHost,
@@ -221,7 +223,8 @@ createServer(async (request,response) => {
 
   if(request.method!=='GET'&&request.method!=='HEAD') return json(response,405,{error:'Methode nicht erlaubt.'})
   const relative = decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html'
-  if(!['index.html','favicon.svg','icons.svg'].includes(relative)&&!['assets/','images/','uploads/'].some(prefix=>relative.startsWith(prefix))) return json(response,404,{error:'Nicht gefunden.'})
+  const publicFiles=['index.html','impressum.html','datenschutz.html','cookie-hinweise.html','legal.css','favicon.svg','icons.svg']
+  if(!publicFiles.includes(relative)&&!['assets/','fonts/','images/','uploads/'].some(prefix=>relative.startsWith(prefix))) return json(response,404,{error:'Nicht gefunden.'})
   if(relative.split('/').some(part=>part.startsWith('.'))||relative.endsWith('.json')||relative.endsWith('.tmp')) return json(response,404,{error:'Nicht gefunden.'})
   if(relative.startsWith('images/')||relative.startsWith('uploads/')){
     try{
