@@ -16,6 +16,6 @@
     "busboy": "^1.6.0",
     "dotenv": "^17.4.2",
     "leaflet": "^1.9.4",
-    "nodemailer": "^9.0.5"
+    "nodemailer": "^10.0.9"
   }
 }

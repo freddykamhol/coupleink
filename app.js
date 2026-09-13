@@ -21,11 +21,32 @@ const credentialSets = [
   {source:'VITE_ADMIN_USER / VITE_ADMIN_PASSWORD',user:cleanEnv(process.env.VITE_ADMIN_USER),password:cleanEnv(process.env.VITE_ADMIN_PASSWORD)},
 ]
 const adminCredentials = credentialSets.find(credentials=>credentials.user&&credentials.password)
-const adminSessions = new Set()
+const adminSessions = new Map()
+const adminSessionLifetime = 8 * 60 * 60 * 1000
+const secureCookie = cleanEnv(process.env.COOKIE_SECURE)?.toLowerCase() !== 'false'
 const mimeTypes = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.woff2':'font/woff2'}
 
+const securityHeaders = {
+  'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+  'Referrer-Policy':'strict-origin-when-cross-origin',
+  'X-Content-Type-Options':'nosniff',
+  'X-Frame-Options':'DENY',
+  'Permissions-Policy':'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+  'Strict-Transport-Security':'max-age=31536000; includeSubDomains'
+}
+const requestLimits = new Map()
+const clientAddress = request => request.socket.remoteAddress || 'unknown'
+const allowRequest = (request,bucket,max,windowMs) => {
+  const now=Date.now(),key=`${bucket}:${clientAddress(request)}`,current=requestLimits.get(key)
+  if(requestLimits.size>5000) for(const [storedKey,value] of requestLimits) if(value.resetAt<=now) requestLimits.delete(storedKey)
+  if(!current||current.resetAt<=now){ requestLimits.set(key,{count:1,resetAt:now+windowMs}); return true }
+  if(current.count>=max) return false
+  current.count+=1
+  return true
+}
+
 const json = (response,status,body,headers={}) => {
-  response.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers})
+  response.writeHead(status,{...securityHeaders,'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers})
   response.end(JSON.stringify(body))
 }
 
@@ -152,7 +173,10 @@ const sendInquiry = async ({fields,attachments}) => {
 
 const isAdmin = request => {
   const cookies = Object.fromEntries((request.headers.cookie||'').split(';').map(value=>value.trim().split('=')))
-  return Boolean(cookies.coupleink_admin&&adminSessions.has(cookies.coupleink_admin))
+  const expiresAt=cookies.coupleink_admin&&adminSessions.get(cookies.coupleink_admin)
+  if(!expiresAt) return false
+  if(expiresAt<=Date.now()){ adminSessions.delete(cookies.coupleink_admin); return false }
+  return true
 }
 
 const receiveUploads = request => new Promise((resolve,reject) => {
@@ -185,12 +209,14 @@ const receiveUploads = request => new Promise((resolve,reject) => {
 createServer(async (request,response) => {
   const url = new URL(request.url,'http://localhost')
   if(request.method==='POST' && url.pathname==='/api/admin/login'){
+    if(!allowRequest(request,'admin-login',10,15*60*1000)) return json(response,429,{error:'Zu viele Anmeldeversuche. Bitte später erneut versuchen.'},{'Retry-After':'900'})
     if(!adminCredentials) return json(response,503,{error:'Admin-Zugang ist auf dem Server nicht konfiguriert.'})
     try{
       const {username,password}=await readJson(request)
       if(cleanEnv(username)===adminCredentials.user&&cleanEnv(password)===adminCredentials.password){
-        const token=randomUUID(); adminSessions.add(token)
-        return json(response,200,{ok:true},{'Set-Cookie':`coupleink_admin=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800`})
+        const token=randomUUID(); adminSessions.set(token,Date.now()+adminSessionLifetime)
+        const flags=`HttpOnly; SameSite=Strict; Path=/; Max-Age=28800${secureCookie?'; Secure':''}`
+        return json(response,200,{ok:true},{'Set-Cookie':`coupleink_admin=${token}; ${flags}`})
       }
       return json(response,401,{error:`Benutzername oder Passwort ist falsch. Verwendete Konfiguration: ${adminCredentials.source}.`})
     }catch{ return json(response,400,{error:'Ungültige Anfrage.'}) }
@@ -209,6 +235,7 @@ createServer(async (request,response) => {
   }
 
   if(request.method==='POST' && url.pathname==='/api/inquiries'){
+    if(!allowRequest(request,'inquiry',5,60*60*1000)) return json(response,429,{error:'Zu viele Anfragen. Bitte später erneut versuchen.'},{'Retry-After':'3600'})
     try{
       const inquiry=await receiveInquiry(request)
       await sendInquiry(inquiry)
@@ -223,7 +250,7 @@ createServer(async (request,response) => {
 
   if(request.method!=='GET'&&request.method!=='HEAD') return json(response,405,{error:'Methode nicht erlaubt.'})
   const relative = decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html'
-  const publicFiles=['index.html','impressum.html','datenschutz.html','cookie-hinweise.html','legal.css','favicon.svg','icons.svg']
+  const publicFiles=['index.html','impressum.html','datenschutz.html','cookie-hinweise.html','legal.css','startup-check.js','favicon.svg','icons.svg']
   if(!publicFiles.includes(relative)&&!['assets/','fonts/','images/','uploads/'].some(prefix=>relative.startsWith(prefix))) return json(response,404,{error:'Nicht gefunden.'})
   if(relative.split('/').some(part=>part.startsWith('.'))||relative.endsWith('.json')||relative.endsWith('.tmp')) return json(response,404,{error:'Nicht gefunden.'})
   if(relative.startsWith('images/')||relative.startsWith('uploads/')){
@@ -240,7 +267,7 @@ createServer(async (request,response) => {
   const exists = existsSync(filePath)&&statSync(filePath).isFile()
   if(servesUpload&&!exists) return json(response,404,{error:'Bild nicht gefunden.'})
   const target = exists?filePath:join(root,'index.html')
-  response.writeHead(200,{'Content-Type':mimeTypes[extname(target).toLowerCase()]||'application/octet-stream'})
+  response.writeHead(200,{...securityHeaders,'Content-Type':mimeTypes[extname(target).toLowerCase()]||'application/octet-stream'})
   if(request.method==='HEAD') return response.end()
   createReadStream(target).pipe(response)
 }).listen(port,'0.0.0.0',()=>console.log(`Coupleink läuft auf Port ${port}`))

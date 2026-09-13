@@ -10,14 +10,7 @@
   </head>
   <body>
     <div id="app"></div>
-    <script>
-      window.setTimeout(function () {
-        var app = document.getElementById('app')
-        if (app && !app.children.length && !app.textContent.trim()) {
-          app.innerHTML = '<main style="min-height:100vh;background:#0a0a09;color:#fff;padding:40px;font-family:system-ui"><h1>Website konnte nicht gestartet werden</h1><p>Das JavaScript-Bundle wurde nicht geladen oder ausgeführt.</p></main>'
-        }
-      }, 5000)
-    </script>
+    <script src="/startup-check.js" defer></script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
