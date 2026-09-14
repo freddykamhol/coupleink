@@ -133,7 +133,7 @@ document.querySelector('#app').innerHTML = `
   <footer>
     <div class="footer-top"><p>Bereit für etwas,<br>das bleibt?</p><a href="#booking">Let's talk. ${icon('arrow')}</a></div>
     <div class="footer-grid"><div><img src="${publicAsset('images/Logo-1.png')}" alt="Couple Ink"><p>Tattoo Studio<br>Wörth am Rhein</p></div><div><h3>Kontakt</h3><a href="tel:+4915562913149">+49 15562 913149</a><a href="mailto:kontakt@coupleink.de">kontakt@coupleink.de</a></div><div><h3>Navigation</h3><a href="#works">Arbeiten</a><a href="#story">Über uns</a><a href="#booking">Termin</a></div><div><h3>Social</h3><a href="https://www.instagram.com/coupleink_woerth/" target="_blank" rel="noopener noreferrer" aria-label="Couple Ink auf Instagram öffnen">@coupleink_woerth ${icon('instagram')}</a></div></div>
-    <div class="footer-bottom"><span>© ${new Date().getFullYear()} Couple Ink</span><div><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a><a href="/cookie-hinweise.html">Cookie-Hinweise</a><button class="consent-settings-link" type="button">Cookie-Einstellungen</button><a href="https://coupleink.de/agb/">AGB</a><a href="?admin=1">Admin</a></div><a href="#top">Nach oben ↑</a></div>
+    <div class="footer-bottom"><span>© ${new Date().getFullYear()} Couple Ink</span><div><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a><a href="/cookie-hinweise.html">Cookie-Hinweise</a><button class="consent-settings-link" type="button">Cookie-Einstellungen</button><a href="/agb.html">AGB</a><a href="?admin=1">Admin</a></div><a href="#top">Nach oben ↑</a></div>
   </footer>
 
   <dialog class="lightbox"><button aria-label="Schließen">${icon('close')}</button><img alt="Tattoo-Arbeit vergrößert"><p></p></dialog>

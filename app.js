@@ -24,7 +24,7 @@ const adminCredentials = credentialSets.find(credentials=>credentials.user&&cred
 const adminSessions = new Map()
 const adminSessionLifetime = 8 * 60 * 60 * 1000
 const secureCookie = cleanEnv(process.env.COOKIE_SECURE)?.toLowerCase() !== 'false'
-const mimeTypes = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.woff2':'font/woff2'}
+const mimeTypes = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.woff2':'font/woff2','.pdf':'application/pdf'}
 
 const securityHeaders = {
   'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
@@ -250,7 +250,7 @@ createServer(async (request,response) => {
 
   if(request.method!=='GET'&&request.method!=='HEAD') return json(response,405,{error:'Methode nicht erlaubt.'})
   const relative = decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html'
-  const publicFiles=['index.html','impressum.html','datenschutz.html','cookie-hinweise.html','legal.css','startup-check.js','favicon.svg','icons.svg']
+  const publicFiles=['index.html','impressum.html','datenschutz.html','cookie-hinweise.html','agb.html','agb.pdf','legal.css','startup-check.js','favicon.svg','icons.svg']
   if(!publicFiles.includes(relative)&&!['assets/','fonts/','images/','uploads/'].some(prefix=>relative.startsWith(prefix))) return json(response,404,{error:'Nicht gefunden.'})
   if(relative.split('/').some(part=>part.startsWith('.'))||relative.endsWith('.json')||relative.endsWith('.tmp')) return json(response,404,{error:'Nicht gefunden.'})
   if(relative.startsWith('images/')||relative.startsWith('uploads/')){

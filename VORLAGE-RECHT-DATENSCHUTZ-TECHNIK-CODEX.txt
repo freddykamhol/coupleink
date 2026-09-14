@@ -1,0 +1,382 @@
+AUFTRAG AN CODEX: RECHTLICHE UND DATENSCHUTZTECHNISCHE WEBSITE-PRUEFUNG
+
+Pruefe dieses gesamte Website-Projekt und setze alle fuer Deutschland erforderlichen rechtlichen sowie unmittelbar damit verbundenen technischen Massnahmen um. Untersuche sowohl den Quellcode als auch den Produktions-Build und - sofern erreichbar - die Live-Website.
+
+WICHTIGE ARBEITSREGELN
+
+1. Ermittle zuerst den vollstaendigen technischen Bestand der Website.
+2. Liste alle noch fehlenden Betreiber- und Datenschutzangaben auf und frage sie vor Erstellung der Rechtstexte ab.
+3. Erfinde keine Betreiberangaben, Speicherdauern, Empfaenger oder Rechtsgrundlagen.
+4. Verwende die zum Zeitpunkt der Umsetzung geltende Rechtslage und pruefe aktuelle Gesetzesbezeichnungen und Informationspflichten anhand offizieller Quellen.
+5. Eine hundertprozentige Rechtssicherheit darf nicht versprochen werden. Weise darauf hin, welche Punkte eine individuelle anwaltliche Pruefung oder betriebliche Vereinbarung erfordern.
+6. Nimm erst nach Vorliegen der benoetigten Angaben die Aenderungen vor.
+7. Teste danach technisch, dass die beschriebenen Datenschutzmassnahmen tatsaechlich funktionieren.
+8. Bestehende Rechtstexte muessen vollstaendig ersetzt oder konsistent aktualisiert werden. Keine widerspruechlichen Alttexte stehen lassen.
+
+============================================================
+A. TECHNISCHE BESTANDSAUFNAHME
+============================================================
+
+Pruefe und dokumentiere mindestens:
+
+[ ] Hauptsprachen, Frameworks, CMS, Server und Build-System
+[ ] Hostinganbieter, Reseller, CDN und eingesetzte Serverplattform
+[ ] Cookies mit Name, Anbieter, Zweck, Kategorie und Speicherdauer
+[ ] Local Storage, Session Storage, IndexedDB und vergleichbare Speicherungen
+[ ] Plugins, Bibliotheken, eingebettete Widgets und iFrames
+[ ] Externe JavaScript-, CSS-, Schrift- und Bildressourcen
+[ ] Analyse-, Statistik-, Marketing- und Trackingdienste
+[ ] Karten-, Video-, Social-Media-, Bewertungs- und Captcha-Dienste
+[ ] Kontaktformulare, Datei-Uploads und gespeicherte Formulardaten
+[ ] SMTP-, E-Mail-, Newsletter-, CRM- und Terminverwaltungsdienste
+[ ] Server-Logs, IP-Adressen und technische Metadaten
+[ ] Datenuebermittlungen in Drittstaaten
+[ ] Auftragsverarbeiter und sonstige Datenempfaenger
+[ ] Externe Links getrennt von automatisch geladenen Drittinhalten
+[ ] Ob Dienste bereits vor einer Einwilligung kontaktiert werden
+[ ] Ob Datenschutzerklaerung, Cookie-Hinweise und Consent-Anzeige dem echten technischen Zustand entsprechen
+
+Erstelle daraus eine kurze, fuer Laien verstaendliche Tabelle:
+
+- Dienst oder Technik
+- Anbieter
+- Welche Daten betroffen sind
+- Zweck
+- Automatisch aktiv oder erst nach Zustimmung
+- Rechtsgrundlage
+- Speicherdauer
+- In der Datenschutzerklaerung erwaehnt: Ja/Nein
+
+============================================================
+B. IMPRESSUM
+============================================================
+
+Erstelle beziehungsweise aktualisiere ein Impressum nach der aktuell geltenden Rechtslage, insbesondere nach Paragraph 5 DDG. Entferne veraltete Verweise wie Paragraph 5 TMG.
+
+Pruefe und beruecksichtige:
+
+[ ] Vollstaendige Namen aller Betreiber
+[ ] Rechtsform und korrekte Vertretungsangaben
+[ ] Geschaeftsbezeichnung
+[ ] Ladungsfaehige Anschrift
+[ ] Schnelle elektronische Kontaktmoeglichkeit und E-Mail-Adresse
+[ ] Telefonnummer, sofern angegeben oder erforderlich
+[ ] Register, Registergericht und Registernummer, sofern vorhanden
+[ ] Umsatzsteuer-Identifikationsnummer, sofern vorhanden
+[ ] Wirtschafts-Identifikationsnummer, sofern vorhanden
+[ ] Zustaendige Aufsichtsbehoerde bei erlaubnispflichtiger Taetigkeit
+[ ] Kammer, Berufsbezeichnung und berufsrechtliche Regelungen, sofern einschlaegig
+[ ] Verantwortlicher fuer journalistisch-redaktionelle Inhalte, sofern erforderlich
+[ ] Informationspflichten nach dem Verbraucherstreitbeilegungsgesetz
+[ ] Keine veraltete Verlinkung auf die eingestellte EU-OS-Plattform
+[ ] Impressum von jeder Seite aus leicht erkennbar, unmittelbar erreichbar und dauerhaft verfuegbar
+
+============================================================
+C. DATENSCHUTZERKLAERUNG
+============================================================
+
+Erstelle eine vollstaendige, konkrete und zum echten Projekt passende Datenschutzerklaerung, insbesondere nach Art. 12, 13 und gegebenenfalls Art. 14 DSGVO.
+
+Sie muss mindestens behandeln:
+
+[ ] Jeden Verantwortlichen mit vollstaendigem Namen und vollstaendigen Kontaktdaten
+[ ] Gemeinsame Verantwortlichkeit nach Art. 26 DSGVO, falls mehrere Betreiber gemeinsam Zwecke und Mittel bestimmen
+[ ] Datenschutzbeauftragten oder den Hinweis, dass keiner bestellt ist, sofern zutreffend
+[ ] Zwecke jeder Verarbeitung
+[ ] Konkrete Datenkategorien
+[ ] Rechtsgrundlage jeder Verarbeitung
+[ ] Berechtigte Interessen bei Art. 6 Abs. 1 Buchst. f DSGVO
+[ ] Empfaenger oder Kategorien von Empfaengern
+[ ] Auftragsverarbeiter
+[ ] Drittstaatenuebermittlungen und passende Garantien oder Angemessenheitsbeschluesse
+[ ] Konkrete und realistische Speicherdauern beziehungsweise nachvollziehbare Kriterien
+[ ] Hosting und Server-Logfiles
+[ ] Kontaktaufnahme per Formular, E-Mail und Telefon
+[ ] Datei- und Bilduploads
+[ ] SMTP- und E-Mail-Anbieter
+[ ] Cookies und lokale Browser-Speicherungen
+[ ] Alle tatsaechlich eingesetzten Drittanbieter, Karten und Plugins
+[ ] Lokale oder externe Schriftarten
+[ ] Externe Links und Abgrenzung zu eingebetteten Diensten
+[ ] Minderjaehrige, wenn das Angebot sie betreffen kann
+[ ] Pflicht zur Datenbereitstellung
+[ ] Automatisierte Entscheidungen und Profiling oder ausdruecklicher Hinweis, dass diese nicht stattfinden
+[ ] Widerruf von Einwilligungen mit Wirkung fuer die Zukunft
+[ ] Betroffenenrechte nach Art. 15 bis 20 DSGVO
+[ ] Eigenstaendiger, deutlich sichtbarer Abschnitt zum Widerspruchsrecht nach Art. 21 DSGVO
+[ ] Beschwerderecht und zustaendige Datenschutzaufsichtsbehoerde
+[ ] Stand beziehungsweise Geltungsdatum der Erklaerung
+[ ] Datenschutzerklaerung von jeder Seite dauerhaft erreichbar
+
+Der Abschnitt zum Widerspruchsrecht muss klar erlaeutern:
+
+- Widerspruch bei Verarbeitungen auf Grundlage von Art. 6 Abs. 1 Buchst. e oder f DSGVO
+- Widerspruch aus Gruenden der besonderen Situation
+- Folgen des Widerspruchs und moegliche zwingende schutzwuerdige Gruende
+- Uneingeschraenktes Widerspruchsrecht gegen Direktwerbung und damit verbundenes Profiling
+- Konkreter Kontaktweg fuer den Widerspruch
+
+============================================================
+D. COOKIE- UND CONSENT-LOESUNG
+============================================================
+
+Setze eine Consent-Loesung nach Paragraph 25 TDDDG sowie Art. 6 und Art. 7 DSGVO um.
+
+Technische Mindestanforderungen:
+
+[ ] Einwilligungspflichtige Cookies, externe Abrufe und vergleichbare Technologien sind vor Zustimmung vollstaendig blockiert
+[ ] Ablehnen ist genauso leicht wie Zustimmen
+[ ] Erste Ebene enthaelt mindestens gleichwertige Optionen fuer Akzeptieren und Ablehnen
+[ ] Detaillierte Einstellungen nach Kategorien sind erreichbar
+[ ] Keine vorausgewaehlten optionalen Kategorien
+[ ] Keine manipulative Farbgebung oder irrefuehrende Beschriftung
+[ ] Notwendige Dienste sind von optionalen Diensten getrennt
+[ ] Anbieter, Zweck, Daten, Rechtsgrundlage und Speicherdauer werden vor der Entscheidung erklaert
+[ ] Einwilligung wird nachweisbar und mit Versionsbezug gespeichert, soweit erforderlich
+[ ] Einwilligung kann jederzeit genauso einfach widerrufen oder geaendert werden
+[ ] Dauerhaft erreichbarer Link oder Button Cookie-Einstellungen
+[ ] Nach Widerruf werden optionale Dienste deaktiviert und optional gesetzte Speicherungen entfernt, soweit technisch moeglich
+[ ] Consent-Auswahl wird nur fuer eine angemessene, konkret angegebene Dauer gespeichert
+[ ] Bei wesentlichen Aenderungen wird erneut eine Einwilligung eingeholt
+
+Erstelle ausserdem eine Cookie-Hinweisseite mit einer vollstaendigen Tabelle aller Cookies und lokalen Speicherungen:
+
+- Name
+- Anbieter
+- Kategorie
+- Zweck
+- Rechtsgrundlage
+- Speicherdauer
+- Zugriff durch Dritte
+
+============================================================
+E. EXTERNE DIENSTE, KARTEN UND SCHRIFTEN
+============================================================
+
+[ ] Google Fonts und andere Webfonts nach Moeglichkeit lokal hosten
+[ ] Keine Verbindung zu Google Fonts beim Seitenaufruf
+[ ] Lizenzdateien lokal gespeicherter Schriften aufbewahren
+[ ] OpenStreetMap, Google Maps, Videos, Social Feeds und vergleichbare Inhalte erst nach wirksamer Zustimmung laden, sofern einwilligungspflichtig
+[ ] Vor Zustimmung nur einen lokalen Platzhalter anzeigen
+[ ] Im Platzhalter Zweck, Anbieter und Datenschutzfolge kurz erklaeren
+[ ] Externe Karten- oder Medienressourcen erst durch die Zustimmungsaktion in den DOM beziehungsweise Netzwerkabruf einsetzen
+[ ] Widerruf muss die Einbettung wieder deaktivieren
+[ ] Externe Dienste in Datenschutzerklaerung und Cookie-Hinweisen namentlich nennen
+[ ] Bei OSM insbesondere OpenStreetMap Foundation, tile.openstreetmap.org, uebermittelte Daten, Rechtsgrundlage, Drittlandbezug und Widerruf beschreiben
+[ ] Reine externe Links duerfen keine Daten uebertragen, bevor der Nutzer sie anklickt
+
+============================================================
+F. DATENSCHUTZTECHNISCHE SICHERHEIT
+============================================================
+
+Pruefe und implementiere fuer die Live-Auslieferung geeignete Sicherheitsheader:
+
+[ ] Strict-Transport-Security
+[ ] Content-Security-Policy passend zu den tatsaechlich benoetigten Quellen
+[ ] X-Content-Type-Options: nosniff
+[ ] Schutz gegen Framing durch CSP frame-ancestors und gegebenenfalls X-Frame-Options
+[ ] Referrer-Policy
+[ ] Permissions-Policy
+
+X-XSS-PROTECTION:
+
+X-XSS-Protection soll nicht als vermeintlicher moderner Schutz aktiviert werden. Der Header ist veraltet und wird von modernen Browsern nicht mehr als Sicherheitsmechanismus verwendet. Der Schutz gegen eingeschleuste Skripte erfolgt insbesondere durch eine strenge Content-Security-Policy, sichere Ausgabe-Kodierung und Eingabevalidierung. Wenn ein Pruefwerkzeug den Header erwartet, dokumentiere verstaendlich, dass sein Fehlen kein Sicherheitsmangel ist. Optional kann X-XSS-Protection: 0 gesetzt werden, um alte problematische Filter ausdruecklich zu deaktivieren.
+
+Weitere technische Kontrollen:
+
+[ ] HTTPS ist aktiv und HTTP wird sicher auf HTTPS umgeleitet
+[ ] HSTS nur setzen, wenn die Domain und einbezogene Subdomains dauerhaft ueber HTTPS erreichbar sind
+[ ] Cookies verwenden je nach Zweck Secure, HttpOnly und passendes SameSite
+[ ] Sitzungen laufen serverseitig ab und besitzen eine angemessene Laufzeit
+[ ] Formulare besitzen serverseitige Validierung und Groessenbegrenzungen
+[ ] Datei-Uploads pruefen Dateityp, MIME-Typ, Dateigroesse und sicheren Dateinamen
+[ ] Upload-Verzeichnisse verhindern die Ausfuehrung hochgeladener Dateien
+[ ] Login und Formulare besitzen angemessene Rate-Limits und Missbrauchsschutz
+[ ] Keine Zugangsdaten oder Geheimnisse im Repository oder Frontend
+[ ] Abhaengigkeiten auf bekannte Schwachstellen pruefen und sichere Updates einspielen
+[ ] Fehlerausgaben legen keine internen Daten, Pfade oder Geheimnisse offen
+[ ] Personenbezogene Uploads sind nicht unbeabsichtigt oeffentlich abrufbar
+[ ] Datenschutzangaben stimmen mit der tatsaechlichen Loeschung und Zugriffskontrolle ueberein
+
+Wichtig: Sicherheitsheader muessen auf der Live-Website ausgeliefert werden. Eine Definition nur im Anwendungscode reicht nicht, wenn Nginx, Apache, ein CDN oder das Hosting statische Dateien direkt ausliefert. Pruefe deshalb die echten HTTP-Antwortheader der produktiven Domain.
+
+============================================================
+G. ABSCHLUSSPRUEFUNG
+============================================================
+
+Nach der Umsetzung:
+
+[ ] Produktions-Build erfolgreich ausfuehren
+[ ] Abhaengigkeiten auf bekannte Schwachstellen pruefen
+[ ] Alle Seiten und Rechtstext-Links testen
+[ ] Mobile und Desktop-Darstellung der Rechtstexte und des Consent-Banners pruefen
+[ ] Netzwerkverkehr vor Ablehnung, nach Zustimmung und nach Widerruf vergleichen
+[ ] Sicherstellen, dass vor Zustimmung kein optionaler Drittanbieter kontaktiert wird
+[ ] Cookies und lokale Speicherungen in allen drei Zustaenden pruefen
+[ ] Live-HTTP-Header kontrollieren
+[ ] Formulare, E-Mail-Versand und Upload-Schutz testen
+[ ] Nach alten Gesetzesangaben, Platzhaltern und nicht erwaehnten Drittanbietern suchen
+[ ] Abweichungen zwischen Quellcode, Build und Live-System dokumentieren
+
+Gib zum Abschluss eine kurze Tabelle aus:
+
+- Anforderung
+- Umsetzung
+- Technischer Nachweis
+- Noch offene betriebliche oder rechtliche Aufgabe
+
+============================================================
+H. CHECKLISTE: VOM BETREIBER BENOETIGTE DATEN
+============================================================
+
+1. BETREIBER UND VERANTWORTLICHE
+
+[ ] Vollstaendiger buergerlicher Name jedes Betreibers:
+[ ] Geschaeftsbezeichnung:
+[ ] Rechtsform jedes Betreibers:
+[ ] Vertretungsberechtigte Personen:
+[ ] Ladungsfaehige Geschaeftsanschrift:
+[ ] Telefonnummer:
+[ ] E-Mail-Adresse:
+[ ] Gemeinsame Verantwortlichkeit mehrerer Betreiber: Ja/Nein
+[ ] Falls ja: Wer entscheidet ueber Zwecke und Mittel der Website-Datenverarbeitung?
+[ ] Kontaktstelle fuer Betroffenenanfragen:
+
+2. REGISTER UND STEUERLICHE KENNZEICHNUNG
+
+[ ] Handels-, Vereins-, Partnerschafts- oder Genossenschaftsregister vorhanden: Ja/Nein
+[ ] Registergericht:
+[ ] Registernummer:
+[ ] Umsatzsteuer-Identifikationsnummer vorhanden: Ja/Nein
+[ ] Umsatzsteuer-Identifikationsnummer:
+[ ] Wirtschafts-Identifikationsnummer vorhanden: Ja/Nein
+[ ] Wirtschafts-Identifikationsnummer:
+[ ] Keine persoenliche Steuernummer eintragen
+
+3. AUFSICHT UND BERUF
+
+[ ] Behoerdliche Erlaubnis oder besondere Aufsicht erforderlich: Ja/Nein
+[ ] Zustaendige Aufsichtsbehoerde mit Anschrift:
+[ ] Kammer oder Berufsverband:
+[ ] Gesetzliche Berufsbezeichnung:
+[ ] Staat der Verleihung:
+[ ] Berufsrechtliche Regelungen und Fundstelle:
+
+4. REDAKTIONELLE INHALTE
+
+[ ] Gibt es journalistisch-redaktionelle Inhalte, News oder einen Blog: Ja/Nein
+[ ] Inhaltlich verantwortliche Person:
+[ ] Vollstaendige Anschrift dieser Person:
+
+5. VERBRAUCHERSTREITBEILEGUNG
+
+[ ] Mehr als zehn Beschaeftigte: Ja/Nein
+[ ] Teilnahme an Verbraucherschlichtung: Ja/Nein
+[ ] Falls ja: Schlichtungsstelle und Website:
+
+6. DATENSCHUTZORGANISATION
+
+[ ] Datenschutz-Verantwortlicher, falls abweichend:
+[ ] Datenschutzbeauftragter bestellt: Ja/Nein
+[ ] Falls ja: Name beziehungsweise Stelle, Anschrift und E-Mail:
+[ ] Bestehen Vereinbarungen zur gemeinsamen Verantwortlichkeit: Ja/Nein
+[ ] Bestehen Auftragsverarbeitungsvertraege mit allen Auftragsverarbeitern: Ja/Nein
+
+7. HOSTING UND SERVER
+
+[ ] Hostinganbieter mit vollstaendiger Firma und Anschrift:
+[ ] Reseller mit Firma, Inhaber, Anschrift und Kontakt:
+[ ] Serverstandort beziehungsweise Land:
+[ ] CDN oder Proxy-Dienst:
+[ ] Welche Server-Logs werden gespeichert:
+[ ] Speicherdauer der Server-Logs:
+[ ] Wer hat Serverzugriff:
+
+8. E-MAIL UND SMTP
+
+[ ] Anbieter des E-Mail-Postfachs:
+[ ] SMTP-Anbieter und produktiver SMTP-Host:
+[ ] Serverstandort beziehungsweise Land:
+[ ] Wer hat Zugriff auf das Postfach:
+[ ] Synchronisierte Programme, Apps und Geraeteanbieter:
+[ ] Speicherdauer von Nachrichten:
+[ ] Werden E-Mails oder Backups an weitere Anbieter uebertragen:
+
+9. KONTAKT- UND ANFRAGEFORMULARE
+
+[ ] Welche Pflicht- und freiwilligen Felder gibt es:
+[ ] Welche besonderen Daten koennen enthalten sein, etwa Gesundheitsdaten:
+[ ] Zweck der Verarbeitung:
+[ ] Werden Daten per E-Mail versendet:
+[ ] Werden Daten zusaetzlich in einer Datenbank gespeichert:
+[ ] Wer hat Zugriff:
+[ ] Speicherdauer erfolgloser Anfragen:
+[ ] Speicherdauer bei Vertragsabschluss:
+[ ] Gesetzliche Aufbewahrungsfristen:
+[ ] Mindestalter fuer Anfragen:
+[ ] Verfahren fuer Minderjaehrige und Einwilligung der Erziehungsberechtigten:
+
+10. DATEI- UND BILDUPLOADS
+
+[ ] Welche Dateien duerfen hochgeladen werden:
+[ ] Maximale Dateigroesse:
+[ ] Speicherort:
+[ ] Sind Uploads oeffentlich erreichbar:
+[ ] Wer hat Zugriff:
+[ ] Loeschfrist:
+[ ] Viren- oder Dateityppruefung:
+[ ] Koennen Bilder Personen oder Gesundheitsdaten erkennen lassen:
+
+11. COOKIES UND BROWSER-SPEICHER
+
+[ ] Name jedes Cookies beziehungsweise Speicherschluessels:
+[ ] Anbieter:
+[ ] Zweck:
+[ ] Technisch notwendig oder optional:
+[ ] Speicherdauer:
+[ ] Zugriff durch Dritte:
+[ ] Gewuenschte Dauer der Consent-Entscheidung:
+
+12. DRITTANBIETER UND EXTERNE DIENSTE
+
+[ ] Analyse- oder Statistikdienst:
+[ ] Marketing- oder Werbedienst:
+[ ] Kartenanbieter:
+[ ] Videoanbieter:
+[ ] Captcha-Anbieter:
+[ ] Social-Media-Einbettungen:
+[ ] Bewertungswidgets:
+[ ] Newsletteranbieter:
+[ ] Terminbuchungssystem:
+[ ] CRM oder Kundenverwaltung:
+[ ] Zahlungsanbieter:
+[ ] Chat oder WhatsApp Business:
+[ ] Externe Schriftarten:
+[ ] Weitere externe Skripte, APIs oder CDNs:
+[ ] Fuer jeden Dienst: Vertragspartner, Anschrift, Zweck, Daten, Land, Rechtsgrundlage und Speicherdauer
+
+13. FOTOS, GALERIE UND SOCIAL MEDIA
+
+[ ] Sind alle Bilder eigene Werke oder bestehen Nutzungsrechte:
+[ ] Sind Personen identifizierbar:
+[ ] Liegen dokumentierte Veroeffentlichungseinwilligungen vor:
+[ ] Wo werden Galeriebilder gespeichert:
+[ ] Gibt es nur Profil-Links oder eingebettete Feeds und Plugins:
+
+14. LOESCHUNG UND AUFBEWAHRUNG
+
+[ ] Konkrete Loeschfristen fuer jede Datenkategorie:
+[ ] Steuer- und handelsrechtliche Aufbewahrungspflichten:
+[ ] Verantwortliche Person fuer Loeschungen:
+[ ] Technisches Loeschverfahren inklusive Backups:
+[ ] Verfahren fuer Auskunft, Berichtigung, Loeschung, Widerruf und Widerspruch:
+
+15. VEROEFFENTLICHUNG
+
+[ ] Gewuenschte Unternehmensbezeichnung in den Rechtstexten:
+[ ] Gewuenschtes Geltungsdatum:
+[ ] Produktive Domain:
+[ ] Zugriff auf Hosting- oder Serverkonfiguration vorhanden: Ja/Nein
+[ ] Wer darf Aenderungen veroeffentlichen:
+
+ENDE DER VORLAGE
